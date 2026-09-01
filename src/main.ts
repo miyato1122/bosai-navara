@@ -4,12 +4,32 @@ import {
   type DefaultDescriptions,
 } from "@navaramap/three-default-plugin";
 
-const view = new ThreeView<DefaultDescriptions>({ shadow: true });
+/** Idle quality: keep LOD2 detail. Larger maxSse = coarser tiles. */
+const IDLE_BUILDING_MAX_SSE = 16;
+const MOVING_BUILDING_MAX_SSE = 48;
+
+/** Desktop defaults, restored on moveend. */
+const IDLE_LOD_FOG = { density: 2.0e-4, sseFactor: 2 };
+/** Coarser far tiles while the camera is moving. LOD only — not visual fog. */
+const MOVING_LOD_FOG = { density: 1.0e-3, sseFactor: 8 };
+
+/** Town-scale camera (~2 km) sits well below the engine default 8 km fade. */
+const IDLE_DYNAMIC_SSE = { sseFactor: 24, maxHeight: 4000 };
+const MOVING_DYNAMIC_SSE = { sseFactor: 48, maxHeight: 4000 };
+
+const view = new ThreeView<DefaultDescriptions>({
+  shadow: true,
+  memoryBudget: { maxPendingRequests: 16 },
+  cacheBytes: 512 * 1024 * 1024,
+});
 
 const defaultPlugin = new DefaultPlugin();
 view.addPlugin(defaultPlugin);
 
 await view.init();
+
+view.lodFog = IDLE_LOD_FOG;
+view.dynamicSse = IDLE_DYNAMIC_SSE;
 
 const scene = defaultPlugin.addDefaultPhotorealScene();
 view.atmosphere.date = new Date("2026-07-16T05:00:00Z");
@@ -40,10 +60,27 @@ const buildings = view.addSource({
   type: "3d-tiles",
   url: "https://api.plateauview.mlit.go.jp/datacatalog/3dtiles/29343-bldg-lod2-latest/tileset.json",
 });
-view.addLayer({
+const buildingsLayer = view.addLayer({
   type: "3d-tiles",
   source: buildings,
-  model: { color: new Color().setHex(0xffffff), metalness: 0, roughness: 1 },
+  model: {
+    color: new Color().setHex(0xffffff),
+    metalness: 0,
+    roughness: 1,
+    maxSse: IDLE_BUILDING_MAX_SSE,
+  },
+});
+
+view.camera.on("movestart", () => {
+  buildingsLayer.update({ model: { maxSse: MOVING_BUILDING_MAX_SSE } });
+  view.lodFog = MOVING_LOD_FOG;
+  view.dynamicSse = MOVING_DYNAMIC_SSE;
+});
+
+view.camera.on("moveend", () => {
+  buildingsLayer.update({ model: { maxSse: IDLE_BUILDING_MAX_SSE } });
+  view.lodFog = IDLE_LOD_FOG;
+  view.dynamicSse = IDLE_DYNAMIC_SSE;
 });
 
 view.setCamera({
