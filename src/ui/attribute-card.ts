@@ -13,7 +13,7 @@ export class AttributeCard {
   private readonly minimizeBtn: HTMLButtonElement;
   private closeHandler: (() => void) | undefined;
   private minimized = false;
-  private shownBatchId: number | null = null;
+  private shownGmlId: string | null = null;
 
   constructor(parent: HTMLElement) {
     this.root = document.createElement("aside");
@@ -58,11 +58,11 @@ export class AttributeCard {
     this.closeHandler = handler;
   }
 
-  show(batchId: number, properties: Record<string, unknown>): void {
-    const opening = this.shownBatchId === null;
+  show(gmlId: string, properties: Record<string, unknown>): void {
+    const opening = this.shownGmlId === null;
     const switched =
-      this.shownBatchId !== null && this.shownBatchId !== batchId;
-    this.shownBatchId = batchId;
+      this.shownGmlId !== null && this.shownGmlId !== gmlId;
+    this.shownGmlId = gmlId;
 
     const formatted = formatPlateauAttributes(properties);
     this.titleEl.textContent = formatted.title;
@@ -74,7 +74,7 @@ export class AttributeCard {
   }
 
   hide(): void {
-    this.shownBatchId = null;
+    this.shownGmlId = null;
     this.root.classList.remove("is-visible");
     this.root.setAttribute("aria-hidden", "true");
   }

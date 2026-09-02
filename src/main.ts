@@ -57,8 +57,12 @@ view.on("featureClick", (info) => {
     card.hide();
     return;
   }
-  selection.select(info.batchId);
-  card.show(info.batchId, info.properties ?? {});
+  const properties = info.properties ?? {};
+  const gmlId =
+    typeof properties["gml_id"] === "string" ? properties["gml_id"] : "";
+  if (gmlId) selection.select(gmlId);
+  else selection.clear();
+  card.show(gmlId, properties);
 });
 
 card.onClose(() => {

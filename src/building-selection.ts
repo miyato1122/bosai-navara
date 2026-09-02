@@ -10,17 +10,17 @@ const DEFAULT_COLOR = new Color().setHex(0xffffff);
  */
 export class BuildingSelection {
   private readonly layer: Layer;
-  private selectedBatchId: number | null = null;
+  private selectedGmlId: string | null = null;
 
   constructor(layer: Layer) {
     this.layer = layer;
 
     const apply = ({ evaluator }: { evaluator: FeatureEvaluator }) => {
-      const selected = this.selectedBatchId;
+      const selected = this.selectedGmlId;
       evaluator.evaluate(
-        ({ batchId }) => ({
+        ({ properties }) => ({
           color:
-            selected !== null && batchId === selected
+            selected !== null && properties?.["gml_id"] === selected
               ? SELECTED_COLOR.clone()
               : DEFAULT_COLOR.clone(),
         }),
@@ -32,14 +32,14 @@ export class BuildingSelection {
     this.layer.on("featureUpdated", apply);
   }
 
-  select(batchId: number): void {
-    this.selectedBatchId = batchId;
+  select(gmlId: string): void {
+    this.selectedGmlId = gmlId;
     this.layer.forceUpdate();
   }
 
   clear(): void {
-    if (this.selectedBatchId === null) return;
-    this.selectedBatchId = null;
+    if (this.selectedGmlId === null) return;
+    this.selectedGmlId = null;
     this.layer.forceUpdate();
   }
 }

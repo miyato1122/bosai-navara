@@ -130,10 +130,10 @@ function labelFor(key: string): string {
 
 function hasCodeSibling(
   key: string,
-  present: ReadonlySet<string>,
+  properties: Record<string, unknown>,
 ): boolean {
   if (!key.endsWith("コード")) return false;
-  return present.has(key.slice(0, -"コード".length));
+  return !isEmpty(properties[key.slice(0, -"コード".length)]);
 }
 
 function row(key: string, value: unknown): AttributeRow {
@@ -217,13 +217,12 @@ function buildingTitle(properties: Record<string, unknown>): string {
 export function formatPlateauAttributes(
   properties: Record<string, unknown>,
 ): FormattedBuildingAttributes {
-  const present = new Set(Object.keys(properties));
   const remaining = new Map<string, unknown>();
 
   for (const [key, value] of Object.entries(properties)) {
     if (EXCLUDED_KEYS.has(key)) continue;
     if (isEmpty(value)) continue;
-    if (hasCodeSibling(key, present)) continue;
+    if (hasCodeSibling(key, properties)) continue;
     remaining.set(key, value);
   }
 
