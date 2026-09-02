@@ -4,7 +4,9 @@ import {
   type DefaultDescriptions,
 } from "@navaramap/three-default-plugin";
 import { BuildingSelection } from "./building-selection.ts";
+import { addStorm, setStormVisible } from "./storm.ts";
 import { AttributeCard } from "./ui/attribute-card.ts";
+import "./ui/hud-root.css";
 import { LayerCard } from "./ui/layer-card.ts";
 import borderData from "./data/29343_sango-cho_city_2025_border.json" with { type: "json" };
 
@@ -16,6 +18,14 @@ const defaultPlugin = new DefaultPlugin();
 view.addPlugin(defaultPlugin);
 
 await view.init();
+
+view.canvas.addEventListener(
+  "wheel",
+  (event) => {
+    event.preventDefault();
+  },
+  { passive: false },
+);
 
 const scene = defaultPlugin.addDefaultPhotorealScene();
 view.atmosphere.date = new Date("2026-07-16T05:00:00Z");
@@ -82,8 +92,19 @@ const addBorderLayer = (): Layer =>
   });
 let borderLayer = addBorderLayer();
 
-const layerCard = new LayerCard(document.body);
+const hud = document.getElementById("hud") ?? document.body;
+const layerCard = new LayerCard(hud);
+const card = new AttributeCard(hud);
+
+let storm: ReturnType<typeof addStorm> | undefined;
+try {
+  storm = addStorm(view);
+} catch (error) {
+  console.error("Failed to add storm visuals", error);
+}
+
 layerCard.onToggle((on) => {
+  if (storm) setStormVisible(view, storm, on);
   if (on) {
     if (floodLayer) return;
     // Render order = add order. Recreate the border after flood so the
@@ -97,7 +118,6 @@ layerCard.onToggle((on) => {
   floodLayer = null;
 });
 
-const card = new AttributeCard(document.body);
 const selection = new BuildingSelection(buildingsLayer);
 
 view.on("featureClick", (info) => {
@@ -120,9 +140,10 @@ card.onClose(() => {
 });
 
 view.setCamera({
-  lng: 135.681,
-  lat: 34.601,
-  distance: 2000,
+  // 三郷町役場（奈良県生駒郡三郷町勢野西1-1-1）
+  lng: 135.6955,
+  lat: 34.6001,
+  distance: 1200,
   heading: 20,
   pitch: -35,
   roll: 0,

@@ -3,11 +3,11 @@
 .layer-card {
   top: 16px;
   left: 16px;
-  width: min(320px, calc(100vw - 24px));
+  width: min(320px, calc(100% - 24px));
 }
 
 .layer-card.is-minimized {
-  width: min(280px, calc(100vw - 24px));
+  width: min(280px, calc(100% - 24px));
 }
 
 .layer-card__switch {

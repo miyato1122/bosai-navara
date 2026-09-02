@@ -13,10 +13,10 @@
 }
 
 .hud-card {
-  position: fixed;
+  position: absolute;
   z-index: 20;
   box-sizing: border-box;
-  max-height: calc(100vh - 32px);
+  max-height: calc(100% - 32px);
   display: flex;
   flex-direction: column;
   color: var(--hud-text);

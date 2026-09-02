@@ -3,7 +3,7 @@
 .attr-card {
   top: 16px;
   right: 16px;
-  width: min(380px, calc(100vw - 24px));
+  width: min(380px, calc(100% - 24px));
   opacity: 0;
   pointer-events: none;
   transform: translateX(18px);
@@ -19,7 +19,7 @@
 }
 
 .attr-card.is-minimized {
-  width: min(320px, calc(100vw - 24px));
+  width: min(320px, calc(100% - 24px));
 }
 
 .attr-card__section + .attr-card__section {
