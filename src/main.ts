@@ -55,7 +55,7 @@ view.addLayer({ type: "raster", source: imagery });
 const flood = view.addSource({
   type: "raster-tile",
   url: "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png",
-  maxZoom: 17,
+  maxZoom: 14,
 });
 const addFloodLayer = (): Layer =>
   view.addLayer({
@@ -140,9 +140,10 @@ card.onClose(() => {
 });
 
 view.setCamera({
-  lng: 135.681,
-  lat: 34.601,
-  distance: 2000,
+  // 三郷町役場（奈良県生駒郡三郷町勢野西1-1-1）
+  lng: 135.6955,
+  lat: 34.6001,
+  distance: 1200,
   heading: 20,
   pitch: -35,
   roll: 0,
