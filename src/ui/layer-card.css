@@ -15,7 +15,7 @@
   align-items: center;
   gap: 12px;
   width: 100%;
-  margin: 4px 0 12px;
+  margin: 4px 0 8px;
   padding: 8px 10px;
   border: 1px solid var(--hud-line);
   background: transparent;
@@ -24,6 +24,11 @@
   font-size: 13px;
   cursor: pointer;
   text-align: left;
+}
+
+.layer-card__switch:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .layer-card__switch:hover,
@@ -88,6 +93,13 @@
 .layer-card__switch.is-on .layer-card__switch-state {
   color: var(--hud-cyan);
   text-shadow: 0 0 8px var(--hud-cyan);
+}
+
+.layer-card__note {
+  min-height: 1.2em;
+  margin: -2px 0 10px;
+  font-size: 11px;
+  color: var(--hud-muted);
 }
 
 .layer-card__legend-title {

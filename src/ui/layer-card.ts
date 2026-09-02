@@ -1,23 +1,22 @@
+import { FLOOD_DEPTH_CLASSES } from "../flood-depth.ts";
 import "./layer-card.css";
 
-/** Official 重ねるハザードマップ flood-depth legend colors. */
-export const FLOOD_DEPTH_CLASSES = [
-  { css: "rgb(247, 245, 169)", label: "0.5m未満" },
-  { css: "rgb(255, 216, 192)", label: "0.5〜3.0m" },
-  { css: "rgb(255, 183, 183)", label: "3.0〜5.0m" },
-  { css: "rgb(255, 145, 145)", label: "5.0〜10.0m" },
-  { css: "rgb(242, 133, 201)", label: "10.0〜20.0m" },
-  { css: "rgb(220, 122, 220)", label: "20.0m以上" },
-] as const;
+export { FLOOD_DEPTH_CLASSES };
 
 export class LayerCard {
   private readonly root: HTMLElement;
   private readonly minimizeBtn: HTMLButtonElement;
   private readonly switchBtn: HTMLButtonElement;
   private readonly switchStateEl: HTMLElement;
+  private readonly water3dBtn: HTMLButtonElement;
+  private readonly water3dStateEl: HTMLElement;
+  private readonly water3dNoteEl: HTMLElement;
   private toggleHandler: ((on: boolean) => void) | undefined;
+  private water3dToggleHandler: ((on: boolean) => void) | undefined;
   private minimized = false;
   private on = true;
+  private water3dOn = false;
+  private water3dBusy = false;
 
   constructor(parent: HTMLElement) {
     this.root = document.createElement("aside");
@@ -35,7 +34,7 @@ export class LayerCard {
         </div>
       </header>
       <div class="hud-card__body">
-        <button type="button" class="layer-card__switch is-on" role="switch" aria-checked="true">
+        <button type="button" class="layer-card__switch layer-card__switch--flood is-on" role="switch" aria-checked="true">
           <span class="layer-card__switch-track" aria-hidden="true">
             <span class="layer-card__switch-thumb"></span>
           </span>
@@ -44,14 +43,27 @@ export class LayerCard {
             <span class="layer-card__switch-state">ON</span>
           </span>
         </button>
+        <button type="button" class="layer-card__switch layer-card__switch--water3d" role="switch" aria-checked="false">
+          <span class="layer-card__switch-track" aria-hidden="true">
+            <span class="layer-card__switch-thumb"></span>
+          </span>
+          <span class="layer-card__switch-text">
+            <span class="layer-card__switch-label">浸水深を3Dで体感</span>
+            <span class="layer-card__switch-state">OFF</span>
+          </span>
+        </button>
+        <p class="layer-card__note" aria-live="polite"></p>
         <h3 class="layer-card__legend-title">浸水深</h3>
         <ul class="layer-card__legend"></ul>
       </div>
     `;
 
     this.minimizeBtn = this.root.querySelector(".layer-card__minimize")!;
-    this.switchBtn = this.root.querySelector(".layer-card__switch")!;
-    this.switchStateEl = this.root.querySelector(".layer-card__switch-state")!;
+    this.switchBtn = this.root.querySelector(".layer-card__switch--flood")!;
+    this.switchStateEl = this.switchBtn.querySelector(".layer-card__switch-state")!;
+    this.water3dBtn = this.root.querySelector(".layer-card__switch--water3d")!;
+    this.water3dStateEl = this.water3dBtn.querySelector(".layer-card__switch-state")!;
+    this.water3dNoteEl = this.root.querySelector(".layer-card__note")!;
     const legend = this.root.querySelector(".layer-card__legend")!;
     for (const cls of FLOOD_DEPTH_CLASSES) {
       const li = document.createElement("li");
@@ -76,12 +88,38 @@ export class LayerCard {
       this.setOn(!this.on);
       this.toggleHandler?.(this.on);
     });
+    this.water3dBtn.addEventListener("click", () => {
+      if (this.water3dBusy) return;
+      this.setWater3dOn(!this.water3dOn);
+      this.water3dToggleHandler?.(this.water3dOn);
+    });
 
     parent.append(this.root);
   }
 
   onToggle(handler: (on: boolean) => void): void {
     this.toggleHandler = handler;
+  }
+
+  onWater3dToggle(handler: (on: boolean) => void): void {
+    this.water3dToggleHandler = handler;
+  }
+
+  setWater3dOn(on: boolean): void {
+    this.water3dOn = on;
+    this.water3dBtn.classList.toggle("is-on", on);
+    this.water3dBtn.setAttribute("aria-checked", String(on));
+    this.water3dStateEl.textContent = on ? "ON" : "OFF";
+  }
+
+  setWater3dNote(text: string): void {
+    this.water3dNoteEl.textContent = text;
+  }
+
+  setWater3dBusy(busy: boolean): void {
+    this.water3dBusy = busy;
+    this.water3dBtn.disabled = busy;
+    this.water3dBtn.setAttribute("aria-busy", String(busy));
   }
 
   private setOn(on: boolean): void {

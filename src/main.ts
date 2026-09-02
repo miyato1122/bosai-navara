@@ -4,6 +4,7 @@ import {
   type DefaultDescriptions,
 } from "@navaramap/three-default-plugin";
 import { BuildingSelection } from "./building-selection.ts";
+import { setFloodWater3dVisible } from "./flood-water-3d.ts";
 import { addStorm, setStormVisible } from "./storm.ts";
 import { AttributeCard } from "./ui/attribute-card.ts";
 import "./ui/hud-root.css";
@@ -116,6 +117,40 @@ layerCard.onToggle((on) => {
   }
   floodLayer?.delete();
   floodLayer = null;
+});
+
+layerCard.onWater3dToggle((on) => {
+  void (async () => {
+    if (!on) {
+      await setFloodWater3dVisible(view, terrain, false);
+      layerCard.setWater3dNote("");
+      return;
+    }
+    layerCard.setWater3dBusy(true);
+    layerCard.setWater3dNote("(解析中…)");
+    try {
+      const ok = await setFloodWater3dVisible(
+        view,
+        terrain,
+        true,
+        (done, total) => {
+          layerCard.setWater3dNote(`(解析中… ${done}/${total})`);
+        },
+      );
+      if (!ok) {
+        layerCard.setWater3dOn(false);
+        layerCard.setWater3dNote("(データ取得不可)");
+        return;
+      }
+      layerCard.setWater3dNote("");
+    } catch (error) {
+      console.error("Failed to show flood water columns", error);
+      layerCard.setWater3dOn(false);
+      layerCard.setWater3dNote("(取得失敗)");
+    } finally {
+      layerCard.setWater3dBusy(false);
+    }
+  })();
 });
 
 const selection = new BuildingSelection(buildingsLayer);
