@@ -10,7 +10,16 @@ import borderData from "./data/29343_sango-cho_city_2025_border.json" with { typ
 
 const FLOOD_OPACITY = 0.7;
 
-const view = new ThreeView<DefaultDescriptions>({ shadow: true });
+// Flood rasters are baked onto quantized-mesh tiles. Navara caps that bake at
+// 5 WebMercator tiles per terrain tile and coarsens zoom when the overlap
+// exceeds it, so large terrain tiles make the inundation grid look chunky.
+// Lower maxSse (default 2) keeps terrain tiles small enough to drape z=17.
+// dynamicSse is off so a tilted town view does not relax that budget.
+const view = new ThreeView<DefaultDescriptions>({
+  shadow: true,
+  maxSse: 1,
+  dynamicSse: { enabled: false },
+});
 
 const defaultPlugin = new DefaultPlugin();
 view.addPlugin(defaultPlugin);
