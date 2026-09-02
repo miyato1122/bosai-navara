@@ -1,51 +1,9 @@
-:root {
-  --attr-cyan: #00e5ff;
-  --attr-cyan-dim: rgba(0, 229, 255, 0.18);
-  --attr-red: #ff2a2a;
-  --attr-red-glow: rgba(255, 42, 42, 0.45);
-  --attr-bg: rgba(6, 10, 18, 0.78);
-  --attr-text: #d7f6ff;
-  --attr-muted: #7aa0b0;
-  --attr-heading: #f4fcff;
-  --attr-line: rgba(0, 229, 255, 0.35);
-  --attr-font-display: "Orbitron", ui-sans-serif, system-ui, sans-serif;
-  --attr-font-mono: "Share Tech Mono", ui-monospace, "Cascadia Code", monospace;
-}
+@import "./hud-card.css";
 
 .attr-card {
-  position: fixed;
   top: 16px;
   right: 16px;
-  z-index: 20;
-  box-sizing: border-box;
   width: min(380px, calc(100vw - 24px));
-  max-height: calc(100vh - 32px);
-  display: flex;
-  flex-direction: column;
-  color: var(--attr-text);
-  font-family: var(--attr-font-mono);
-  font-size: 13px;
-  line-height: 1.45;
-  background:
-    linear-gradient(180deg, rgba(0, 229, 255, 0.08), transparent 42%),
-    var(--attr-bg);
-  border: 1px solid var(--attr-line);
-  box-shadow:
-    0 0 0 1px rgba(255, 42, 42, 0.18) inset,
-    0 0 24px var(--attr-red-glow),
-    0 12px 40px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  clip-path: polygon(
-    10px 0,
-    calc(100% - 10px) 0,
-    100% 10px,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
-    10px 100%,
-    0 calc(100% - 10px),
-    0 10px
-  );
   opacity: 0;
   pointer-events: none;
   transform: translateX(18px);
@@ -60,176 +18,8 @@
   transform: translateX(0);
 }
 
-.attr-card::before,
-.attr-card::after {
-  content: "";
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  pointer-events: none;
-  border: 2px solid var(--attr-cyan);
-  filter: drop-shadow(0 0 4px var(--attr-cyan));
-}
-
-.attr-card::before {
-  top: 6px;
-  left: 6px;
-  border-right: 0;
-  border-bottom: 0;
-}
-
-.attr-card::after {
-  right: 6px;
-  bottom: 6px;
-  border-left: 0;
-  border-top: 0;
-}
-
-.attr-card__corners {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.attr-card__corners::before,
-.attr-card__corners::after {
-  content: "";
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  border: 2px solid var(--attr-red);
-  filter: drop-shadow(0 0 4px var(--attr-red));
-}
-
-.attr-card__corners::before {
-  top: 6px;
-  right: 6px;
-  border-left: 0;
-  border-bottom: 0;
-}
-
-.attr-card__corners::after {
-  left: 6px;
-  bottom: 6px;
-  border-right: 0;
-  border-top: 0;
-}
-
-.attr-card__scan {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 2px,
-    rgba(0, 229, 255, 0.035) 3px
-  );
-  overflow: hidden;
-}
-
-.attr-card__scan::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 28%;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(0, 229, 255, 0.08),
-    transparent
-  );
-  animation: attr-scan 3.6s linear infinite;
-}
-
 .attr-card.is-minimized {
   width: min(320px, calc(100vw - 24px));
-}
-
-.attr-card.is-minimized .attr-card__header {
-  border-bottom: none;
-  padding-bottom: 14px;
-}
-
-.attr-card.is-minimized .attr-card__body {
-  display: none;
-}
-
-.attr-card.is-minimized .attr-card__title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.attr-card__header {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 4px 12px;
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid var(--attr-line);
-}
-
-.attr-card__eyebrow {
-  grid-column: 1;
-  font-family: var(--attr-font-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.28em;
-  color: var(--attr-cyan);
-  text-shadow: 0 0 8px var(--attr-cyan);
-}
-
-.attr-card__title {
-  grid-column: 1;
-  margin: 0;
-  font-family: var(--attr-font-display);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: var(--attr-heading);
-  overflow-wrap: anywhere;
-}
-
-.attr-card__actions {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  align-self: start;
-  display: flex;
-  gap: 6px;
-}
-
-.attr-card__icon-btn {
-  width: 28px;
-  height: 28px;
-  margin: 0;
-  padding: 0;
-  border: 1px solid var(--attr-line);
-  background: transparent;
-  color: var(--attr-cyan);
-  font-family: var(--attr-font-mono);
-  font-size: 16px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.attr-card__close {
-  font-size: 18px;
-}
-
-.attr-card__icon-btn:hover,
-.attr-card__icon-btn:focus-visible {
-  border-color: var(--attr-red);
-  color: var(--attr-red);
-  box-shadow: 0 0 10px var(--attr-red-glow);
-  outline: none;
-}
-
-.attr-card__body {
-  position: relative;
-  overflow: auto;
-  padding: 8px 18px 18px;
 }
 
 .attr-card__section + .attr-card__section {
@@ -238,18 +28,18 @@
 
 .attr-card__section-title {
   margin: 0 0 8px;
-  font-family: var(--attr-font-display);
+  font-family: var(--hud-font-display);
   font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.18em;
-  color: var(--attr-cyan);
+  color: var(--hud-cyan);
   text-transform: uppercase;
 }
 
 .attr-card__group-title {
   margin: 10px 0 6px;
   font-size: 11px;
-  color: var(--attr-heading);
+  color: var(--hud-heading);
   letter-spacing: 0.04em;
 }
 
@@ -269,28 +59,31 @@
 
 .attr-card__row dt {
   margin: 0;
-  color: var(--attr-muted);
+  color: var(--hud-muted);
   letter-spacing: 0.04em;
 }
 
 .attr-card__row dd {
   margin: 0;
-  color: var(--attr-heading);
+  color: var(--hud-heading);
   overflow-wrap: anywhere;
   text-align: right;
 }
 
 .attr-card__empty {
   margin: 12px 0 0;
-  color: var(--attr-muted);
+  color: var(--hud-muted);
 }
 
-@keyframes attr-scan {
-  from {
-    transform: translateY(-100%);
-  }
-  to {
-    transform: translateY(400%);
+.attr-card__close {
+  font-size: 18px;
+}
+
+@media (max-width: 768px) {
+  .attr-card {
+    top: auto;
+    bottom: 16px;
+    max-height: calc(50vh - 24px);
   }
 }
 
@@ -298,9 +91,5 @@
   .attr-card {
     transition: opacity 120ms ease;
     transform: none;
-  }
-
-  .attr-card__scan::after {
-    animation: none;
   }
 }
