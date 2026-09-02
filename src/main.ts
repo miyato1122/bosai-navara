@@ -3,6 +3,8 @@ import {
   DefaultPlugin,
   type DefaultDescriptions,
 } from "@navaramap/three-default-plugin";
+import { BuildingSelection } from "./building-selection.ts";
+import { AttributeCard } from "./ui/attribute-card.ts";
 
 const view = new ThreeView<DefaultDescriptions>({ shadow: true });
 
@@ -40,10 +42,32 @@ const buildings = view.addSource({
   type: "3d-tiles",
   url: "https://api.plateauview.mlit.go.jp/datacatalog/3dtiles/29343-bldg-lod2-latest/tileset.json",
 });
-view.addLayer({
+const buildingsLayer = view.addLayer({
   type: "3d-tiles",
   source: buildings,
   model: { color: new Color().setHex(0xffffff), metalness: 0, roughness: 1 },
+});
+
+const card = new AttributeCard(document.body);
+const selection = new BuildingSelection(buildingsLayer);
+
+view.on("featureClick", (info) => {
+  if (!info || info.layerId !== buildingsLayer.id) {
+    selection.clear();
+    card.hide();
+    return;
+  }
+  const properties = info.properties ?? {};
+  const gmlId =
+    typeof properties["gml_id"] === "string" ? properties["gml_id"] : "";
+  if (gmlId) selection.select(gmlId);
+  else selection.clear();
+  card.show(gmlId, properties);
+});
+
+card.onClose(() => {
+  selection.clear();
+  card.hide();
 });
 
 view.setCamera({
