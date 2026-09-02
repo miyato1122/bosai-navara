@@ -1,4 +1,4 @@
-import ThreeView, { Color } from "@navaramap/three";
+import ThreeView, { Color, type Layer } from "@navaramap/three";
 import {
   DefaultPlugin,
   type DefaultDescriptions,
@@ -7,6 +7,8 @@ import { BuildingSelection } from "./building-selection.ts";
 import { AttributeCard } from "./ui/attribute-card.ts";
 import { LayerCard } from "./ui/layer-card.ts";
 import borderData from "./data/29343_sango-cho_city_2025_border.json" with { type: "json" };
+
+const FLOOD_OPACITY = 0.7;
 
 const view = new ThreeView<DefaultDescriptions>({ shadow: true });
 
@@ -45,12 +47,13 @@ const flood = view.addSource({
   url: "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png",
   maxZoom: 17,
 });
-const FLOOD_OPACITY = 0.7;
-const floodLayer = view.addLayer({
-  type: "raster",
-  source: flood,
-  raster: { opacity: FLOOD_OPACITY, show: true },
-});
+const addFloodLayer = (): Layer =>
+  view.addLayer({
+    type: "raster",
+    source: flood,
+    raster: { opacity: FLOOD_OPACITY },
+  });
+let floodLayer: Layer | null = addFloodLayer();
 
 const buildings = view.addSource({
   type: "3d-tiles",
@@ -66,22 +69,32 @@ const border = view.addSource({
   type: "geojson",
   data: borderData,
 });
-view.addLayer({
-  type: "vector",
-  source: border,
-  polyline: {
-    color: new Color().setHex(0xff0000),
-    width: 3,
-    clampToGround: true,
-    geometryTypes: ["line", "polygon"],
-  },
-});
+const addBorderLayer = (): Layer =>
+  view.addLayer({
+    type: "vector",
+    source: border,
+    polyline: {
+      color: new Color().setHex(0xff0000),
+      width: 3,
+      clampToGround: true,
+      geometryTypes: ["line", "polygon"],
+    },
+  });
+let borderLayer = addBorderLayer();
 
 const layerCard = new LayerCard(document.body);
 layerCard.onToggle((on) => {
-  floodLayer.update({
-    raster: { show: on, opacity: on ? FLOOD_OPACITY : 0 },
-  });
+  if (on) {
+    if (floodLayer) return;
+    // Render order = add order. Recreate the border after flood so the
+    // town outline stays on top of the inundation overlay.
+    borderLayer.delete();
+    floodLayer = addFloodLayer();
+    borderLayer = addBorderLayer();
+    return;
+  }
+  floodLayer?.delete();
+  floodLayer = null;
 });
 
 const card = new AttributeCard(document.body);
