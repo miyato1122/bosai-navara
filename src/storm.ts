@@ -2,7 +2,7 @@ import type ThreeView from "@navaramap/three";
 import type { DefaultDescriptions } from "@navaramap/three-default-plugin";
 
 const CLEAR_EXPOSURE = 3;
-const STORM_EXPOSURE = 2.4;
+const STORM_EXPOSURE = 2.15;
 
 /** Adds visual rain. Not meteorological data. */
 export function addStorm(view: ThreeView<DefaultDescriptions>) {
@@ -10,17 +10,17 @@ export function addStorm(view: ThreeView<DefaultDescriptions>) {
 
   const rain = view.addMesh({
     rain: {
-      particleCount: 8000,
-      speed: 0.0025,
-      opacity: 0.45,
-      height: 60,
+      particleCount: 14000,
+      speed: 0.0032,
+      opacity: 0.62,
+      height: 75,
     },
   });
   const rainDrop = view.addEffect({
     rainDrop: {
-      dropDensity: 0.7,
-      opacity: 0.4,
-      refractionStrength: 0.18,
+      dropDensity: 1.1,
+      opacity: 0.55,
+      refractionStrength: 0.22,
     },
   });
 
