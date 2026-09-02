@@ -17,26 +17,26 @@ export class AttributeCard {
 
   constructor(parent: HTMLElement) {
     this.root = document.createElement("aside");
-    this.root.className = "attr-card";
+    this.root.className = "hud-card attr-card";
     this.root.setAttribute("aria-hidden", "true");
     this.root.setAttribute("aria-label", "建物属性");
 
     this.root.innerHTML = `
-      <div class="attr-card__scan" aria-hidden="true"></div>
-      <div class="attr-card__corners" aria-hidden="true"></div>
-      <header class="attr-card__header">
-        <span class="attr-card__eyebrow">BUILDING DATA</span>
-        <h2 class="attr-card__title"></h2>
-        <div class="attr-card__actions">
-          <button type="button" class="attr-card__icon-btn attr-card__minimize" aria-label="最小化" aria-expanded="true">−</button>
-          <button type="button" class="attr-card__icon-btn attr-card__close" aria-label="閉じる">×</button>
+      <div class="hud-card__scan" aria-hidden="true"></div>
+      <div class="hud-card__corners" aria-hidden="true"></div>
+      <header class="hud-card__header">
+        <span class="hud-card__eyebrow">BUILDING DATA</span>
+        <h2 class="hud-card__title"></h2>
+        <div class="hud-card__actions">
+          <button type="button" class="hud-card__icon-btn attr-card__minimize" aria-label="最小化" aria-expanded="true">−</button>
+          <button type="button" class="hud-card__icon-btn attr-card__close" aria-label="閉じる">×</button>
         </div>
       </header>
-      <div class="attr-card__body"></div>
+      <div class="hud-card__body"></div>
     `;
 
-    this.titleEl = this.root.querySelector(".attr-card__title")!;
-    this.bodyEl = this.root.querySelector(".attr-card__body")!;
+    this.titleEl = this.root.querySelector(".hud-card__title")!;
+    this.bodyEl = this.root.querySelector(".hud-card__body")!;
     this.minimizeBtn = this.root.querySelector(".attr-card__minimize")!;
     const closeBtn = this.root.querySelector(".attr-card__close")!;
 

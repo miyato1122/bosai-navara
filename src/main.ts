@@ -5,6 +5,7 @@ import {
 } from "@navaramap/three-default-plugin";
 import { BuildingSelection } from "./building-selection.ts";
 import { AttributeCard } from "./ui/attribute-card.ts";
+import { LayerCard } from "./ui/layer-card.ts";
 import borderData from "./data/29343_sango-cho_city_2025_border.json" with { type: "json" };
 
 const view = new ThreeView<DefaultDescriptions>({ shadow: true });
@@ -39,6 +40,17 @@ const imagery = view.addSource({
 });
 view.addLayer({ type: "raster", source: imagery });
 
+const flood = view.addSource({
+  type: "raster-tile",
+  url: "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png",
+  maxZoom: 17,
+});
+const floodLayer = view.addLayer({
+  type: "raster",
+  source: flood,
+  raster: { opacity: 0.7, show: true },
+});
+
 const buildings = view.addSource({
   type: "3d-tiles",
   url: "https://api.plateauview.mlit.go.jp/datacatalog/3dtiles/29343-bldg-lod2-latest/tileset.json",
@@ -62,6 +74,11 @@ view.addLayer({
     clampToGround: true,
     geometryTypes: ["line", "polygon"],
   },
+});
+
+const layerCard = new LayerCard(document.body);
+layerCard.onToggle((on) => {
+  floodLayer.update({ raster: { show: on } });
 });
 
 const card = new AttributeCard(document.body);
@@ -109,5 +126,9 @@ view.attribution?.add([
   {
     attribution: "国土地理院タイル（全国最新写真）",
     attributionUrl: "https://maps.gsi.go.jp/development/ichiran.html",
+  },
+  {
+    attribution: "重ねるハザードマップ（洪水浸水想定） / 国土地理院",
+    attributionUrl: "https://disaportal.gsi.go.jp/",
   },
 ]);
