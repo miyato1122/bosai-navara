@@ -5,6 +5,7 @@ import {
 } from "@navaramap/three-default-plugin";
 import { BuildingSelection } from "./building-selection.ts";
 import { AttributeCard } from "./ui/attribute-card.ts";
+import borderData from "./data/29343_sango-cho_city_2025_border.json" with { type: "json" };
 
 const view = new ThreeView<DefaultDescriptions>({ shadow: true });
 
@@ -46,6 +47,21 @@ const buildingsLayer = view.addLayer({
   type: "3d-tiles",
   source: buildings,
   model: { color: new Color().setHex(0xffffff), metalness: 0, roughness: 1 },
+});
+
+const border = view.addSource({
+  type: "geojson",
+  data: borderData,
+});
+view.addLayer({
+  type: "vector",
+  source: border,
+  polyline: {
+    color: new Color().setHex(0xff0000),
+    width: 3,
+    clampToGround: true,
+    geometryTypes: ["line", "polygon"],
+  },
 });
 
 const card = new AttributeCard(document.body);
