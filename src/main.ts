@@ -45,10 +45,11 @@ const flood = view.addSource({
   url: "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png",
   maxZoom: 17,
 });
+const FLOOD_OPACITY = 0.7;
 const floodLayer = view.addLayer({
   type: "raster",
   source: flood,
-  raster: { opacity: 0.7, show: true },
+  raster: { opacity: FLOOD_OPACITY, show: true },
 });
 
 const buildings = view.addSource({
@@ -78,7 +79,9 @@ view.addLayer({
 
 const layerCard = new LayerCard(document.body);
 layerCard.onToggle((on) => {
-  floodLayer.update({ raster: { show: on } });
+  floodLayer.update({
+    raster: { show: on, opacity: on ? FLOOD_OPACITY : 0 },
+  });
 });
 
 const card = new AttributeCard(document.body);
