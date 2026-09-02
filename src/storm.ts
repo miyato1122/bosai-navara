@@ -3,15 +3,10 @@ import type { DefaultDescriptions } from "@navaramap/three-default-plugin";
 
 const CLEAR_EXPOSURE = 3;
 const STORM_EXPOSURE = 1.6;
-
-export type Storm = {
-  rain: ReturnType<ThreeView<DefaultDescriptions>["addMesh"]>;
-  rainDrop: ReturnType<ThreeView<DefaultDescriptions>["addEffect"]>;
-  clouds: ReturnType<ThreeView<DefaultDescriptions>["addEffect"]>;
-};
+const STORM_CLOUD_COVERAGE = 0.45;
 
 /** Adds a visual storm (rain particles, lens drops, clouds). Not meteorological data. */
-export function addStorm(view: ThreeView<DefaultDescriptions>): Storm {
+export function addStorm(view: ThreeView<DefaultDescriptions>) {
   view.animation = true;
 
   const rain = view.addMesh({
@@ -30,7 +25,7 @@ export function addStorm(view: ThreeView<DefaultDescriptions>): Storm {
   });
   const clouds = view.addEffect({
     clouds: {
-      coverage: 0.45,
+      coverage: STORM_CLOUD_COVERAGE,
       absorptionCoefficient: 5,
       haze: true,
       qualityPreset: "medium",
@@ -42,6 +37,8 @@ export function addStorm(view: ThreeView<DefaultDescriptions>): Storm {
   return { rain, rainDrop, clouds };
 }
 
+export type Storm = ReturnType<typeof addStorm>;
+
 export function setStormVisible(
   view: ThreeView<DefaultDescriptions>,
   storm: Storm,
@@ -50,5 +47,9 @@ export function setStormVisible(
   storm.rain.visible = on;
   storm.rainDrop.visible = on;
   storm.clouds.visible = on;
+  // Official examples hide volumetric clouds with coverage: 0.
+  storm.clouds.update({
+    clouds: { coverage: on ? STORM_CLOUD_COVERAGE : 0 },
+  } as Parameters<Storm["clouds"]["update"]>[0]);
   view.toneMappingExposure = on ? STORM_EXPOSURE : CLEAR_EXPOSURE;
 }
