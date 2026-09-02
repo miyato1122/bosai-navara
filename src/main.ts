@@ -4,6 +4,7 @@ import {
   type DefaultDescriptions,
 } from "@navaramap/three-default-plugin";
 import { BuildingSelection } from "./building-selection.ts";
+import { addStorm, setStormVisible } from "./storm.ts";
 import { AttributeCard } from "./ui/attribute-card.ts";
 import { LayerCard } from "./ui/layer-card.ts";
 import borderData from "./data/29343_sango-cho_city_2025_border.json" with { type: "json" };
@@ -82,8 +83,11 @@ const addBorderLayer = (): Layer =>
   });
 let borderLayer = addBorderLayer();
 
+const storm = addStorm(view);
+
 const layerCard = new LayerCard(document.body);
 layerCard.onToggle((on) => {
+  setStormVisible(view, storm, on);
   if (on) {
     if (floodLayer) return;
     // Render order = add order. Recreate the border after flood so the
