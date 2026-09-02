@@ -6,6 +6,7 @@ import {
 import { BuildingSelection } from "./building-selection.ts";
 import { addStorm, setStormVisible } from "./storm.ts";
 import { AttributeCard } from "./ui/attribute-card.ts";
+import "./ui/hud-root.css";
 import { LayerCard } from "./ui/layer-card.ts";
 import borderData from "./data/29343_sango-cho_city_2025_border.json" with { type: "json" };
 
@@ -83,11 +84,19 @@ const addBorderLayer = (): Layer =>
   });
 let borderLayer = addBorderLayer();
 
-const storm = addStorm(view);
+const hud = document.getElementById("hud") ?? document.body;
+const layerCard = new LayerCard(hud);
+const card = new AttributeCard(hud);
 
-const layerCard = new LayerCard(document.body);
+let storm: ReturnType<typeof addStorm> | undefined;
+try {
+  storm = addStorm(view);
+} catch (error) {
+  console.error("Failed to add storm visuals", error);
+}
+
 layerCard.onToggle((on) => {
-  setStormVisible(view, storm, on);
+  if (storm) setStormVisible(view, storm, on);
   if (on) {
     if (floodLayer) return;
     // Render order = add order. Recreate the border after flood so the
@@ -101,7 +110,6 @@ layerCard.onToggle((on) => {
   floodLayer = null;
 });
 
-const card = new AttributeCard(document.body);
 const selection = new BuildingSelection(buildingsLayer);
 
 view.on("featureClick", (info) => {
