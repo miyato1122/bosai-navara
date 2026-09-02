@@ -19,6 +19,14 @@ view.addPlugin(defaultPlugin);
 
 await view.init();
 
+view.canvas.addEventListener(
+  "wheel",
+  (event) => {
+    event.preventDefault();
+  },
+  { passive: false },
+);
+
 const scene = defaultPlugin.addDefaultPhotorealScene();
 view.atmosphere.date = new Date("2026-07-16T05:00:00Z");
 view.toneMappingExposure = 3;

@@ -1,13 +1,23 @@
-/* Keep the WebGL canvas below HUD. Postprocessing (rain/clouds) promotes
-   the canvas to its own compositor layer, which can paint over later siblings
-   unless stacking contexts are explicit. */
+html,
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+}
+
+/* Navara sets 100vw/100vh inline; that overflows the visual viewport when
+   the page is pinch-zoomed and pushes HUD cards off-screen. */
 #navara-root {
   position: relative;
   z-index: 0;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 #hud {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 20;
   pointer-events: none;
