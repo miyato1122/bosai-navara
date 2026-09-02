@@ -16,7 +16,6 @@ export class LayerCard {
   private minimized = false;
   private on = true;
   private water3dOn = false;
-  private water3dBusy = false;
 
   constructor(parent: HTMLElement) {
     this.root = document.createElement("aside");
@@ -89,7 +88,6 @@ export class LayerCard {
       this.toggleHandler?.(this.on);
     });
     this.water3dBtn.addEventListener("click", () => {
-      if (this.water3dBusy) return;
       this.setWater3dOn(!this.water3dOn);
       this.water3dToggleHandler?.(this.water3dOn);
     });
@@ -117,9 +115,11 @@ export class LayerCard {
   }
 
   setWater3dBusy(busy: boolean): void {
-    this.water3dBusy = busy;
-    this.water3dBtn.disabled = busy;
     this.water3dBtn.setAttribute("aria-busy", String(busy));
+  }
+
+  isWater3dOn(): boolean {
+    return this.water3dOn;
   }
 
   private setOn(on: boolean): void {

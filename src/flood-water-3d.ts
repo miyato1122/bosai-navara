@@ -11,6 +11,8 @@ import { scanFloodGrid, type FloodCell } from "./flood-grid.ts";
 const WATER_SINK = 2;
 const WATER_OPACITY = 0.5;
 const SAMPLE_BATCH = 2000;
+/** Match the reference DEM zoom; max-LOD sampling of 2000+ points is too slow. */
+const TERRAIN_SAMPLE_LEVEL = 14;
 
 type View = ThreeView<DefaultDescriptions>;
 
@@ -37,7 +39,8 @@ interface WaterColumnCollection {
 let geojson: WaterColumnCollection | null = null;
 let source: Source | null = null;
 let layer: Layer | null = null;
-let loading = false;
+let loadId = 0;
+let abortController: AbortController | null = null;
 
 function cellToFeature(cell: FloodCell, terrainHeight: number): WaterColumnFeature {
   const depth = DEPTH_REPRESENTATIVE[cell.classIdx] ?? 0.3;
@@ -63,20 +66,33 @@ function cellToFeature(cell: FloodCell, terrainHeight: number): WaterColumnFeatu
   };
 }
 
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    throw new DOMException("Aborted", "AbortError");
+  }
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
 async function buildGeojson(
   view: View,
   terrain: Source,
   onStatus?: Water3dStatus,
+  signal?: AbortSignal,
 ): Promise<WaterColumnCollection | null> {
   if (geojson) return geojson;
 
   const cells = await scanFloodGrid((done, total) => {
     onStatus?.(`(解析中… ${done}/${total})`);
   });
+  throwIfAborted(signal);
   if (cells.length === 0) return null;
 
   const features: WaterColumnFeature[] = [];
   for (let i = 0; i < cells.length; i += SAMPLE_BATCH) {
+    throwIfAborted(signal);
     const batch = cells.slice(i, i + SAMPLE_BATCH);
     onStatus?.(
       `(地形を取得中… ${Math.min(i + batch.length, cells.length)}/${cells.length})`,
@@ -87,6 +103,7 @@ async function buildGeojson(
         lat: (cell.north + cell.south) / 2,
         lng: (cell.west + cell.east) / 2,
       })),
+      { level: TERRAIN_SAMPLE_LEVEL, signal },
     );
     for (let j = 0; j < batch.length; j++) {
       const height = samples[j]?.height;
@@ -95,6 +112,7 @@ async function buildGeojson(
     }
   }
 
+  throwIfAborted(signal);
   if (features.length === 0) return null;
   geojson = { type: "FeatureCollection", features };
   return geojson;
@@ -154,6 +172,9 @@ export async function setFloodWater3dVisible(
   onStatus?: Water3dStatus,
 ): Promise<boolean> {
   if (!on) {
+    loadId += 1;
+    abortController?.abort();
+    abortController = null;
     removeWaterLayer();
     return true;
   }
@@ -162,14 +183,20 @@ export async function setFloodWater3dVisible(
     addWaterLayer(view, geojson);
     return true;
   }
-  if (loading) return false;
-  loading = true;
+
+  const myId = ++loadId;
+  const ac = new AbortController();
+  abortController = ac;
   try {
-    const data = await buildGeojson(view, terrain, onStatus);
+    const data = await buildGeojson(view, terrain, onStatus, ac.signal);
+    if (myId !== loadId) return true;
     if (!data) return false;
     addWaterLayer(view, data);
     return true;
+  } catch (error) {
+    if (myId !== loadId || isAbortError(error)) return true;
+    throw error;
   } finally {
-    loading = false;
+    if (abortController === ac) abortController = null;
   }
 }

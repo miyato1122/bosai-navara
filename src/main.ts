@@ -123,6 +123,7 @@ layerCard.onWater3dToggle((on) => {
   void (async () => {
     if (!on) {
       await setFloodWater3dVisible(view, terrain, false);
+      layerCard.setWater3dBusy(false);
       layerCard.setWater3dNote("");
       return;
     }
@@ -134,9 +135,13 @@ layerCard.onWater3dToggle((on) => {
         terrain,
         true,
         (message) => {
-          layerCard.setWater3dNote(message);
+          if (layerCard.isWater3dOn()) layerCard.setWater3dNote(message);
         },
       );
+      if (!layerCard.isWater3dOn()) {
+        layerCard.setWater3dNote("");
+        return;
+      }
       if (!ok) {
         layerCard.setWater3dOn(false);
         layerCard.setWater3dNote("(データ取得不可)");
@@ -145,8 +150,10 @@ layerCard.onWater3dToggle((on) => {
       layerCard.setWater3dNote("");
     } catch (error) {
       console.error("Failed to show flood water columns", error);
-      layerCard.setWater3dOn(false);
-      layerCard.setWater3dNote("(取得失敗)");
+      if (layerCard.isWater3dOn()) {
+        layerCard.setWater3dOn(false);
+        layerCard.setWater3dNote("(取得失敗)");
+      }
     } finally {
       layerCard.setWater3dBusy(false);
     }
