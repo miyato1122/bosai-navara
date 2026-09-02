@@ -55,7 +55,7 @@ view.addLayer({ type: "raster", source: imagery });
 const flood = view.addSource({
   type: "raster-tile",
   url: "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png",
-  maxZoom: 14,
+  maxZoom: 17,
 });
 const addFloodLayer = (): Layer =>
   view.addLayer({
