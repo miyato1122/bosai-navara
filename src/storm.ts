@@ -2,8 +2,8 @@ import type ThreeView from "@navaramap/three";
 import type { DefaultDescriptions } from "@navaramap/three-default-plugin";
 
 const CLEAR_EXPOSURE = 3;
-const STORM_EXPOSURE = 1.6;
-const STORM_CLOUD_COVERAGE = 0.45;
+const STORM_EXPOSURE = 2.4;
+const STORM_CLOUD_COVERAGE = 0.28;
 
 /** Adds a visual storm (rain particles, lens drops, clouds). Not meteorological data. */
 export function addStorm(view: ThreeView<DefaultDescriptions>) {
@@ -11,22 +11,23 @@ export function addStorm(view: ThreeView<DefaultDescriptions>) {
 
   const rain = view.addMesh({
     rain: {
-      particleCount: 20000,
-      speed: 0.004,
-      opacity: 0.8,
-      height: 90,
+      particleCount: 8000,
+      speed: 0.0025,
+      opacity: 0.45,
+      height: 60,
     },
   });
   const rainDrop = view.addEffect({
     rainDrop: {
-      dropDensity: 2.5,
-      opacity: 0.85,
+      dropDensity: 0.7,
+      opacity: 0.4,
+      refractionStrength: 0.18,
     },
   });
   const clouds = view.addEffect({
     clouds: {
       coverage: STORM_CLOUD_COVERAGE,
-      absorptionCoefficient: 5,
+      absorptionCoefficient: 2,
       haze: true,
       qualityPreset: "medium",
     },
