@@ -59,6 +59,7 @@ export class AttributeCard {
   }
 
   show(batchId: number, properties: Record<string, unknown>): void {
+    const opening = this.shownBatchId === null;
     const switched =
       this.shownBatchId !== null && this.shownBatchId !== batchId;
     this.shownBatchId = batchId;
@@ -69,12 +70,11 @@ export class AttributeCard {
     this.root.classList.add("is-visible");
     this.root.setAttribute("aria-hidden", "false");
 
-    if (switched) this.expand();
+    if (opening || switched) this.expand();
   }
 
   hide(): void {
     this.shownBatchId = null;
-    this.expand();
     this.root.classList.remove("is-visible");
     this.root.setAttribute("aria-hidden", "true");
   }
