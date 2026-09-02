@@ -79,6 +79,14 @@
   font-size: 18px;
 }
 
+@media (max-width: 768px) {
+  .attr-card {
+    top: auto;
+    bottom: 16px;
+    max-height: calc(50vh - 24px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .attr-card {
     transition: opacity 120ms ease;

@@ -124,6 +124,12 @@
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.35);
 }
 
+@media (max-width: 768px) {
+  .layer-card {
+    max-height: calc(50vh - 24px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .layer-card__switch-thumb {
     transition: none;
