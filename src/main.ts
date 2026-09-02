@@ -58,7 +58,7 @@ view.on("featureClick", (info) => {
     return;
   }
   selection.select(info.batchId);
-  card.show(info.properties ?? {});
+  card.show(info.batchId, info.properties ?? {});
 });
 
 card.onClose(() => {

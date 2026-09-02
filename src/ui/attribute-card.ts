@@ -10,7 +10,10 @@ export class AttributeCard {
   private readonly root: HTMLElement;
   private readonly titleEl: HTMLElement;
   private readonly bodyEl: HTMLElement;
+  private readonly minimizeBtn: HTMLButtonElement;
   private closeHandler: (() => void) | undefined;
+  private minimized = false;
+  private shownBatchId: number | null = null;
 
   constructor(parent: HTMLElement) {
     this.root = document.createElement("aside");
@@ -24,17 +27,25 @@ export class AttributeCard {
       <header class="attr-card__header">
         <span class="attr-card__eyebrow">BUILDING DATA</span>
         <h2 class="attr-card__title"></h2>
-        <button type="button" class="attr-card__close" aria-label="閉じる">×</button>
+        <div class="attr-card__actions">
+          <button type="button" class="attr-card__icon-btn attr-card__minimize" aria-label="最小化" aria-expanded="true">−</button>
+          <button type="button" class="attr-card__icon-btn attr-card__close" aria-label="閉じる">×</button>
+        </div>
       </header>
       <div class="attr-card__body"></div>
     `;
 
     this.titleEl = this.root.querySelector(".attr-card__title")!;
     this.bodyEl = this.root.querySelector(".attr-card__body")!;
+    this.minimizeBtn = this.root.querySelector(".attr-card__minimize")!;
     const closeBtn = this.root.querySelector(".attr-card__close")!;
 
     this.root.addEventListener("pointerdown", (event) => {
       event.stopPropagation();
+    });
+    this.minimizeBtn.addEventListener("click", () => {
+      if (this.minimized) this.expand();
+      else this.minimize();
     });
     closeBtn.addEventListener("click", () => {
       this.closeHandler?.();
@@ -47,17 +58,41 @@ export class AttributeCard {
     this.closeHandler = handler;
   }
 
-  show(properties: Record<string, unknown>): void {
+  show(batchId: number, properties: Record<string, unknown>): void {
+    const switched =
+      this.shownBatchId !== null && this.shownBatchId !== batchId;
+    this.shownBatchId = batchId;
+
     const formatted = formatPlateauAttributes(properties);
     this.titleEl.textContent = formatted.title;
     this.bodyEl.replaceChildren(renderBody(formatted));
     this.root.classList.add("is-visible");
     this.root.setAttribute("aria-hidden", "false");
+
+    if (switched) this.expand();
   }
 
   hide(): void {
+    this.shownBatchId = null;
+    this.expand();
     this.root.classList.remove("is-visible");
     this.root.setAttribute("aria-hidden", "true");
+  }
+
+  private minimize(): void {
+    this.minimized = true;
+    this.root.classList.add("is-minimized");
+    this.minimizeBtn.textContent = "□";
+    this.minimizeBtn.setAttribute("aria-label", "展開");
+    this.minimizeBtn.setAttribute("aria-expanded", "false");
+  }
+
+  private expand(): void {
+    this.minimized = false;
+    this.root.classList.remove("is-minimized");
+    this.minimizeBtn.textContent = "−";
+    this.minimizeBtn.setAttribute("aria-label", "最小化");
+    this.minimizeBtn.setAttribute("aria-expanded", "true");
   }
 }
 
