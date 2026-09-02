@@ -133,8 +133,8 @@ layerCard.onWater3dToggle((on) => {
         view,
         terrain,
         true,
-        (done, total) => {
-          layerCard.setWater3dNote(`(解析中… ${done}/${total})`);
+        (message) => {
+          layerCard.setWater3dNote(message);
         },
       );
       if (!ok) {

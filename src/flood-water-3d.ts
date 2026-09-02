@@ -6,17 +6,15 @@ import ThreeView, {
 } from "@navaramap/three";
 import type { DefaultDescriptions } from "@navaramap/three-default-plugin";
 import { DEPTH_REPRESENTATIVE, WATER_COLORS } from "./flood-depth.ts";
-import {
-  scanFloodGrid,
-  type FloodCell,
-  type FloodScanProgress,
-} from "./flood-grid.ts";
+import { scanFloodGrid, type FloodCell } from "./flood-grid.ts";
 
 const WATER_SINK = 2;
 const WATER_OPACITY = 0.5;
 const SAMPLE_BATCH = 2000;
 
 type View = ThreeView<DefaultDescriptions>;
+
+export type Water3dStatus = (message: string) => void;
 
 interface WaterColumnFeature {
   type: "Feature";
@@ -37,6 +35,7 @@ interface WaterColumnCollection {
 }
 
 let geojson: WaterColumnCollection | null = null;
+let source: Source | null = null;
 let layer: Layer | null = null;
 let loading = false;
 
@@ -67,16 +66,21 @@ function cellToFeature(cell: FloodCell, terrainHeight: number): WaterColumnFeatu
 async function buildGeojson(
   view: View,
   terrain: Source,
-  onProgress?: FloodScanProgress,
+  onStatus?: Water3dStatus,
 ): Promise<WaterColumnCollection | null> {
   if (geojson) return geojson;
 
-  const cells = await scanFloodGrid(onProgress);
+  const cells = await scanFloodGrid((done, total) => {
+    onStatus?.(`(解析中… ${done}/${total})`);
+  });
   if (cells.length === 0) return null;
 
   const features: WaterColumnFeature[] = [];
   for (let i = 0; i < cells.length; i += SAMPLE_BATCH) {
     const batch = cells.slice(i, i + SAMPLE_BATCH);
+    onStatus?.(
+      `(地形を取得中… ${Math.min(i + batch.length, cells.length)}/${cells.length})`,
+    );
     const samples = await view.sampleTerrainMostDetailed(
       terrain,
       batch.map((cell) => ({
@@ -114,10 +118,10 @@ function applyWaterStyle(evaluator: FeatureEvaluator): void {
 }
 
 function addWaterLayer(view: View, data: WaterColumnCollection): void {
-  const waterSource = view.addSource({ type: "geojson", data });
+  source = view.addSource({ type: "geojson", data });
   layer = view.addLayer({
     type: "vector",
-    source: waterSource,
+    source,
     polygon: {
       color: new Color().setStyle(WATER_COLORS[2]),
       opacity: WATER_OPACITY,
@@ -131,6 +135,13 @@ function addWaterLayer(view: View, data: WaterColumnCollection): void {
   layer.on("featureUpdated", ({ evaluator }) => applyWaterStyle(evaluator));
 }
 
+function removeWaterLayer(): void {
+  layer?.delete();
+  layer = null;
+  source?.delete();
+  source = null;
+}
+
 /**
  * Show or hide extruded flood-depth columns.
  * First show scans hazard tiles and samples terrain (cached afterwards).
@@ -140,20 +151,21 @@ export async function setFloodWater3dVisible(
   view: View,
   terrain: Source,
   on: boolean,
-  onProgress?: FloodScanProgress,
+  onStatus?: Water3dStatus,
 ): Promise<boolean> {
   if (!on) {
-    layer?.update({ polygon: { show: false } });
+    removeWaterLayer();
     return true;
   }
-  if (layer) {
-    layer.update({ polygon: { show: true } });
+  if (layer) return true;
+  if (geojson) {
+    addWaterLayer(view, geojson);
     return true;
   }
   if (loading) return false;
   loading = true;
   try {
-    const data = await buildGeojson(view, terrain, onProgress);
+    const data = await buildGeojson(view, terrain, onStatus);
     if (!data) return false;
     addWaterLayer(view, data);
     return true;
