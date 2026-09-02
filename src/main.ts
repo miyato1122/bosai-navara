@@ -8,10 +8,7 @@ import {
 const IDLE_BUILDING_MAX_SSE = 16;
 const MOVING_BUILDING_MAX_SSE = 48;
 
-const view = new ThreeView<DefaultDescriptions>({
-  shadow: true,
-  cacheBytes: 512 * 1024 * 1024,
-});
+const view = new ThreeView<DefaultDescriptions>({ shadow: true });
 
 const defaultPlugin = new DefaultPlugin();
 view.addPlugin(defaultPlugin);
