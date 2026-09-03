@@ -31,11 +31,13 @@ export function addStorm(view: ThreeView<DefaultDescriptions>) {
 
 export type Storm = ReturnType<typeof addStorm>;
 
-export function setStormVisible(
+/** Rain stays on while either flood overlay is visible. */
+export function setStormActive(
   view: ThreeView<DefaultDescriptions>,
   storm: Storm,
   on: boolean,
 ): void {
+  view.animation = true;
   storm.rain.visible = on;
   storm.rainDrop.visible = on;
   view.toneMappingExposure = on ? STORM_EXPOSURE : CLEAR_EXPOSURE;

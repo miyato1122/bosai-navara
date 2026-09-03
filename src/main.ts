@@ -4,7 +4,8 @@ import {
   type DefaultDescriptions,
 } from "@navaramap/three-default-plugin";
 import { BuildingSelection } from "./building-selection.ts";
-import { addStorm, setStormVisible } from "./storm.ts";
+import { setFloodWater3dVisible } from "./flood-water-3d.ts";
+import { addStorm, setStormActive } from "./storm.ts";
 import { AttributeCard } from "./ui/attribute-card.ts";
 import "./ui/hud-root.css";
 import { LayerCard } from "./ui/layer-card.ts";
@@ -103,8 +104,21 @@ try {
   console.error("Failed to add storm visuals", error);
 }
 
+function isRaining(): boolean {
+  return layerCard.isFloodOn() || layerCard.isWater3dOn();
+}
+
+function syncStorm(): void {
+  if (!storm) return;
+  setStormActive(view, storm, isRaining());
+}
+
+syncStorm();
+
+let water3dToggleId = 0;
+
 layerCard.onToggle((on) => {
-  if (storm) setStormVisible(view, storm, on);
+  syncStorm();
   if (on) {
     if (floodLayer) return;
     // Render order = add order. Recreate the border after flood so the
@@ -116,6 +130,58 @@ layerCard.onToggle((on) => {
   }
   floodLayer?.delete();
   floodLayer = null;
+});
+
+layerCard.onWater3dToggle((on) => {
+  const toggleId = ++water3dToggleId;
+  void (async () => {
+    syncStorm();
+    if (!on) {
+      await setFloodWater3dVisible(view, terrain, false);
+      if (toggleId !== water3dToggleId) return;
+      layerCard.setWater3dBusy(false);
+      layerCard.setWater3dNote("");
+      return;
+    }
+    layerCard.setWater3dBusy(true);
+    layerCard.setWater3dNote("(解析中…)");
+    try {
+      const ok = await setFloodWater3dVisible(
+        view,
+        terrain,
+        true,
+        (message) => {
+          if (toggleId !== water3dToggleId) return;
+          if (layerCard.isWater3dOn()) layerCard.setWater3dNote(message);
+        },
+      );
+      if (toggleId !== water3dToggleId) return;
+      if (!layerCard.isWater3dOn()) {
+        layerCard.setWater3dNote("");
+        return;
+      }
+      if (!ok) {
+        layerCard.setWater3dOn(false);
+        syncStorm();
+        layerCard.setWater3dNote("(データ取得不可)");
+        return;
+      }
+      layerCard.setWater3dNote("");
+      syncStorm();
+    } catch (error) {
+      if (toggleId !== water3dToggleId) return;
+      console.error("Failed to show flood water columns", error);
+      if (layerCard.isWater3dOn()) {
+        layerCard.setWater3dOn(false);
+        syncStorm();
+        layerCard.setWater3dNote("(取得失敗)");
+      }
+    } finally {
+      if (toggleId === water3dToggleId) {
+        layerCard.setWater3dBusy(false);
+      }
+    }
+  })();
 });
 
 const selection = new BuildingSelection(buildingsLayer);
