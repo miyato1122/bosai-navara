@@ -126,6 +126,10 @@ export class LayerCard {
     return this.water3dOn;
   }
 
+  isFloodOn(): boolean {
+    return this.on;
+  }
+
   private setOn(on: boolean): void {
     this.on = on;
     this.switchBtn.classList.toggle("is-on", on);

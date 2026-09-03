@@ -104,8 +104,17 @@ try {
   console.error("Failed to add storm visuals", error);
 }
 
+function syncStorm(): void {
+  if (!storm) return;
+  setStormVisible(
+    view,
+    storm,
+    layerCard.isFloodOn() || layerCard.isWater3dOn(),
+  );
+}
+
 layerCard.onToggle((on) => {
-  if (storm) setStormVisible(view, storm, on);
+  syncStorm();
   if (on) {
     if (floodLayer) return;
     // Render order = add order. Recreate the border after flood so the
@@ -121,6 +130,7 @@ layerCard.onToggle((on) => {
 
 layerCard.onWater3dToggle((on) => {
   void (async () => {
+    syncStorm();
     if (!on) {
       await setFloodWater3dVisible(view, terrain, false);
       layerCard.setWater3dBusy(false);
@@ -144,6 +154,7 @@ layerCard.onWater3dToggle((on) => {
       }
       if (!ok) {
         layerCard.setWater3dOn(false);
+        syncStorm();
         layerCard.setWater3dNote("(データ取得不可)");
         return;
       }
@@ -152,6 +163,7 @@ layerCard.onWater3dToggle((on) => {
       console.error("Failed to show flood water columns", error);
       if (layerCard.isWater3dOn()) {
         layerCard.setWater3dOn(false);
+        syncStorm();
         layerCard.setWater3dNote("(取得失敗)");
       }
     } finally {
