@@ -5,7 +5,7 @@ import {
 } from "@navaramap/three-default-plugin";
 import { BuildingSelection } from "./building-selection.ts";
 import { setFloodWater3dVisible } from "./flood-water-3d.ts";
-import { addStorm, setStormVisible } from "./storm.ts";
+import { addStorm, removeStorm } from "./storm.ts";
 import { AttributeCard } from "./ui/attribute-card.ts";
 import "./ui/hud-root.css";
 import { LayerCard } from "./ui/layer-card.ts";
@@ -98,20 +98,24 @@ const layerCard = new LayerCard(hud);
 const card = new AttributeCard(hud);
 
 let storm: ReturnType<typeof addStorm> | undefined;
-try {
-  storm = addStorm(view);
-} catch (error) {
-  console.error("Failed to add storm visuals", error);
-}
 
 function syncStorm(): void {
+  const raining = layerCard.isFloodOn() || layerCard.isWater3dOn();
+  if (raining) {
+    if (storm) return;
+    try {
+      storm = addStorm(view);
+    } catch (error) {
+      console.error("Failed to add storm visuals", error);
+    }
+    return;
+  }
   if (!storm) return;
-  setStormVisible(
-    view,
-    storm,
-    layerCard.isFloodOn() || layerCard.isWater3dOn(),
-  );
+  removeStorm(view, storm);
+  storm = undefined;
 }
+
+syncStorm();
 
 layerCard.onToggle((on) => {
   syncStorm();

@@ -31,13 +31,11 @@ export function addStorm(view: ThreeView<DefaultDescriptions>) {
 
 export type Storm = ReturnType<typeof addStorm>;
 
-export function setStormVisible(
+export function removeStorm(
   view: ThreeView<DefaultDescriptions>,
   storm: Storm,
-  on: boolean,
 ): void {
-  if (on) view.animation = true;
-  storm.rain.visible = on;
-  storm.rainDrop.visible = on;
-  view.toneMappingExposure = on ? STORM_EXPOSURE : CLEAR_EXPOSURE;
+  storm.rain.delete();
+  storm.rainDrop.delete();
+  view.toneMappingExposure = CLEAR_EXPOSURE;
 }
