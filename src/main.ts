@@ -13,6 +13,10 @@ import borderData from "./data/29343_sango-cho_city_2025_border.json" with { typ
 
 const FLOOD_OPACITY = 0.7;
 
+/** Idle quality: keep LOD2 detail. Larger maxSse = coarser tiles. */
+const IDLE_BUILDING_MAX_SSE = 16;
+const MOVING_BUILDING_MAX_SSE = 48;
+
 const view = new ThreeView<DefaultDescriptions>({ shadow: true });
 
 const defaultPlugin = new DefaultPlugin();
@@ -73,7 +77,20 @@ const buildings = view.addSource({
 const buildingsLayer = view.addLayer({
   type: "3d-tiles",
   source: buildings,
-  model: { color: new Color().setHex(0xffffff), metalness: 0, roughness: 1 },
+  model: {
+    color: new Color().setHex(0xffffff),
+    metalness: 0,
+    roughness: 1,
+    maxSse: IDLE_BUILDING_MAX_SSE,
+  },
+});
+
+view.camera.on("movestart", () => {
+  buildingsLayer.update({ model: { maxSse: MOVING_BUILDING_MAX_SSE } });
+});
+
+view.camera.on("moveend", () => {
+  buildingsLayer.update({ model: { maxSse: IDLE_BUILDING_MAX_SSE } });
 });
 
 const border = view.addSource({
