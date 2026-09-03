@@ -31,11 +31,14 @@ export function addStorm(view: ThreeView<DefaultDescriptions>) {
 
 export type Storm = ReturnType<typeof addStorm>;
 
-export function removeStorm(
+/** Rain stays on while either flood overlay is visible. */
+export function setStormActive(
   view: ThreeView<DefaultDescriptions>,
   storm: Storm,
+  on: boolean,
 ): void {
-  storm.rain.delete();
-  storm.rainDrop.delete();
-  view.toneMappingExposure = CLEAR_EXPOSURE;
+  view.animation = true;
+  storm.rain.visible = on;
+  storm.rainDrop.visible = on;
+  view.toneMappingExposure = on ? STORM_EXPOSURE : CLEAR_EXPOSURE;
 }
