@@ -159,6 +159,7 @@ layerCard.onWater3dToggle((on) => {
         return;
       }
       layerCard.setWater3dNote("");
+      syncStorm();
     } catch (error) {
       console.error("Failed to show flood water columns", error);
       if (layerCard.isWater3dOn()) {

@@ -36,6 +36,7 @@ export function setStormVisible(
   storm: Storm,
   on: boolean,
 ): void {
+  if (on) view.animation = true;
   storm.rain.visible = on;
   storm.rainDrop.visible = on;
   view.toneMappingExposure = on ? STORM_EXPOSURE : CLEAR_EXPOSURE;
