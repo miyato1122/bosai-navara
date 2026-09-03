@@ -65,9 +65,11 @@ function tileUrl(z: number, x: number, y: number): string {
 
 let scanPromise: Promise<FloodCell[]> | null = null;
 
-/** Scan town-wide flood tiles into ~63 m cells. Cached after the first run. */
+/** Scan town-wide flood tiles into ~63 m cells. Successful non-empty results are cached. */
 export function scanFloodGrid(onProgress?: FloodScanProgress): Promise<FloodCell[]> {
-  scanPromise ??= (async () => {
+  if (scanPromise) return scanPromise;
+
+  scanPromise = (async () => {
     const bbox = CITY_BBOX;
     const { x0, y0, x1, y1 } = tileRange(bbox, FLOOD_Z);
     const total = (x1 - x0 + 1) * (y1 - y0 + 1);
@@ -127,8 +129,15 @@ export function scanFloodGrid(onProgress?: FloodScanProgress): Promise<FloodCell
     await Promise.all(jobs);
     return cells;
   })();
-  void scanPromise.catch(() => {
-    scanPromise = null;
-  });
+
+  void scanPromise
+    .then((cells) => {
+      if (cells.length === 0) scanPromise = null;
+      return cells;
+    })
+    .catch(() => {
+      scanPromise = null;
+    });
+
   return scanPromise;
 }

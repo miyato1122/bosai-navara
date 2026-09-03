@@ -115,6 +115,8 @@ function syncStorm(): void {
 
 syncStorm();
 
+let water3dToggleId = 0;
+
 layerCard.onToggle((on) => {
   syncStorm();
   if (on) {
@@ -131,10 +133,12 @@ layerCard.onToggle((on) => {
 });
 
 layerCard.onWater3dToggle((on) => {
+  const toggleId = ++water3dToggleId;
   void (async () => {
     syncStorm();
     if (!on) {
       await setFloodWater3dVisible(view, terrain, false);
+      if (toggleId !== water3dToggleId) return;
       layerCard.setWater3dBusy(false);
       layerCard.setWater3dNote("");
       return;
@@ -147,9 +151,11 @@ layerCard.onWater3dToggle((on) => {
         terrain,
         true,
         (message) => {
+          if (toggleId !== water3dToggleId) return;
           if (layerCard.isWater3dOn()) layerCard.setWater3dNote(message);
         },
       );
+      if (toggleId !== water3dToggleId) return;
       if (!layerCard.isWater3dOn()) {
         layerCard.setWater3dNote("");
         return;
@@ -163,6 +169,7 @@ layerCard.onWater3dToggle((on) => {
       layerCard.setWater3dNote("");
       syncStorm();
     } catch (error) {
+      if (toggleId !== water3dToggleId) return;
       console.error("Failed to show flood water columns", error);
       if (layerCard.isWater3dOn()) {
         layerCard.setWater3dOn(false);
@@ -170,7 +177,9 @@ layerCard.onWater3dToggle((on) => {
         layerCard.setWater3dNote("(取得失敗)");
       }
     } finally {
-      layerCard.setWater3dBusy(false);
+      if (toggleId === water3dToggleId) {
+        layerCard.setWater3dBusy(false);
+      }
     }
   })();
 });
