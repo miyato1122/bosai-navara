@@ -9,16 +9,23 @@ import { addStorm, setStormActive } from "./storm.ts";
 import { AttributeCard } from "./ui/attribute-card.ts";
 import "./ui/hud-root.css";
 import { LayerCard } from "./ui/layer-card.ts";
+import { LoadingScreen, waitForViewIdle } from "./ui/loading-screen.ts";
 import borderData from "./data/29343_sango-cho_city_2025_border.json" with { type: "json" };
 
 const FLOOD_OPACITY = 0.7;
 
-const view = new ThreeView<DefaultDescriptions>({ shadow: true });
+const loading = new LoadingScreen();
+
+const view = new ThreeView<DefaultDescriptions>({
+  shadow: true,
+  idleThreshold: 500,
+});
 
 const defaultPlugin = new DefaultPlugin();
 view.addPlugin(defaultPlugin);
 
 await view.init();
+loading.setStatus("地図データを読み込み中…");
 
 view.canvas.addEventListener(
   "wheel",
@@ -235,3 +242,7 @@ view.attribution?.add([
     attributionUrl: "https://disaportal.gsi.go.jp/",
   },
 ]);
+
+await waitForViewIdle(view);
+document.getElementById("hud")?.classList.remove("is-pending");
+await loading.dismiss();
