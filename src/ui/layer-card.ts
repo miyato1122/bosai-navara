@@ -11,6 +11,7 @@ export class LayerCard {
   private readonly water3dBtn: HTMLButtonElement;
   private readonly water3dStateEl: HTMLElement;
   private readonly water3dNoteEl: HTMLElement;
+  private readonly legendBlock: HTMLElement;
   private toggleHandler: ((on: boolean) => void) | undefined;
   private water3dToggleHandler: ((on: boolean) => void) | undefined;
   private minimized = false;
@@ -38,10 +39,14 @@ export class LayerCard {
             <span class="layer-card__switch-thumb"></span>
           </span>
           <span class="layer-card__switch-text">
-            <span class="layer-card__switch-label">表示</span>
+            <span class="layer-card__switch-label">浸水深を2D表示</span>
             <span class="layer-card__switch-state">ON</span>
           </span>
         </button>
+        <div class="layer-card__legend-block">
+          <h3 class="layer-card__legend-title">凡例</h3>
+          <ul class="layer-card__legend"></ul>
+        </div>
         <button type="button" class="layer-card__switch layer-card__switch--water3d" role="switch" aria-checked="false">
           <span class="layer-card__switch-track" aria-hidden="true">
             <span class="layer-card__switch-thumb"></span>
@@ -52,8 +57,6 @@ export class LayerCard {
           </span>
         </button>
         <p class="layer-card__note" aria-live="polite"></p>
-        <h3 class="layer-card__legend-title">浸水深</h3>
-        <ul class="layer-card__legend"></ul>
       </div>
     `;
 
@@ -63,6 +66,7 @@ export class LayerCard {
     this.water3dBtn = this.root.querySelector(".layer-card__switch--water3d")!;
     this.water3dStateEl = this.water3dBtn.querySelector(".layer-card__switch-state")!;
     this.water3dNoteEl = this.root.querySelector(".layer-card__note")!;
+    this.legendBlock = this.root.querySelector(".layer-card__legend-block")!;
     const legend = this.root.querySelector(".layer-card__legend")!;
     for (const cls of FLOOD_DEPTH_CLASSES) {
       const li = document.createElement("li");
@@ -127,6 +131,7 @@ export class LayerCard {
     this.switchBtn.classList.toggle("is-on", on);
     this.switchBtn.setAttribute("aria-checked", String(on));
     this.switchStateEl.textContent = on ? "ON" : "OFF";
+    this.legendBlock.hidden = !on;
   }
 
   private minimize(): void {

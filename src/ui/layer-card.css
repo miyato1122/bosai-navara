@@ -78,6 +78,7 @@
 }
 
 .layer-card__switch-state {
+  flex-shrink: 0;
   font-family: var(--hud-font-display);
   font-size: 12px;
   font-weight: 700;
@@ -95,6 +96,14 @@
   margin: -2px 0 10px;
   font-size: 11px;
   color: var(--hud-muted);
+}
+
+.layer-card__legend-block {
+  margin: 0 0 10px;
+}
+
+.layer-card__legend-block[hidden] {
+  display: none;
 }
 
 .layer-card__legend-title {
