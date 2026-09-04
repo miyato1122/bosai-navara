@@ -14,9 +14,30 @@
       href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Share+Tech+Mono&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="/src/ui/loading-screen.css" />
   </head>
   <body>
-    <div id="hud"></div>
+    <div
+      id="loading-screen"
+      class="loading-screen"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <aside class="hud-card loading-screen__card" aria-label="読み込み中">
+        <div class="hud-card__scan" aria-hidden="true"></div>
+        <div class="hud-card__corners" aria-hidden="true"></div>
+        <header class="hud-card__header">
+          <span class="hud-card__eyebrow">SYSTEM</span>
+          <h2 class="hud-card__title">LOADING</h2>
+        </header>
+        <div class="hud-card__body">
+          <p class="loading-screen__status">エンジン初期化中…</p>
+          <div class="loading-screen__pulse" aria-hidden="true"></div>
+        </div>
+      </aside>
+    </div>
+    <div id="hud" class="is-pending"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
