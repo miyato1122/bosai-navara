@@ -2,7 +2,13 @@
 
 [Navara](https://navara.world/docs/)（`@navaramap/three`）の検証用アプリケーションです。奈良県生駒郡三郷町を対象に、PLATEAU の建物 3D タイルと国土地理院の洪水浸水想定を重ねて表示します。
 
-初期視点は三郷町役場付近です。建物をクリックすると属性を確認でき、浸水想定は 2D オーバーレイと 3D 水柱のどちらでも表示できます。
+初期視点は三郷町役場付近です。起動直後は地図の準備が整うまでローディング画面を出し、建物をクリックすると属性を確認できます。浸水想定は 2D オーバーレイと 3D 水柱のどちらでも表示できます。
+
+公開版は GitHub Pages にあります。
+
+https://miyato1122.github.io/bosai-navara/
+
+`main` への push で自動デプロイされます。
 
 ## セットアップ
 
@@ -54,9 +60,10 @@ src/
   flood-water-3d.ts       浸水深の 3D 水柱表示
   storm.ts                浸水レイヤ連動の雨演出
   data/                   三郷町の行政界 GeoJSON
-  ui/                     HUD（レイヤカード・属性カード）
-tests/                    浸水深判定などの単体テスト
+  ui/                     HUD（レイヤカード・属性カード・ローディング画面）
+tests/                    浸水深判定・ローディング画面などの単体テスト
 public/                   静的アセット
+.github/workflows/        main 向け GitHub Pages デプロイ
 ```
 
 `src/main.ts` で次のレイヤを重ねています。
