@@ -16,6 +16,7 @@ const FLOOD_OPACITY = 0.7;
 
 const loading = new LoadingScreen();
 
+try {
 const view = new ThreeView<DefaultDescriptions>({
   shadow: true,
   idleThreshold: 500,
@@ -244,5 +245,10 @@ view.attribution?.add([
 ]);
 
 await waitForViewIdle(view);
-document.getElementById("hud")?.classList.remove("is-pending");
-await loading.dismiss();
+} catch (error) {
+  console.error("Failed to initialize application", error);
+  loading.setStatus("初期化に失敗しました");
+} finally {
+  document.getElementById("hud")?.classList.remove("is-pending");
+  await loading.dismiss();
+}
